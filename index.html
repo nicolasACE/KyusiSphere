@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="KyusiSphere helps people discover nearby study spaces, computer shops, and practice locations.">
+  <title>KyusiSphere</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- HEADER: brand, navigation tabs, and login/logout controls. -->
+  <header class="topbar">
+    <a class="brand" href="#" data-action="home"><span>KYUSISPHERE</span></a>
+    <nav id="main-nav" class="nav-links" aria-label="Main navigation">
+      <button class="nav-link active" data-view="discover">Discover</button>
+      <button class="nav-link" data-view="suggest">Suggest a place</button>
+      <button class="nav-link hidden" data-view="owner">Owner dashboard</button>
+      <button class="nav-link hidden" data-view="admin">Admin</button>
+      <button class="nav-link hidden" data-view="roles">Manage roles</button>
+    </nav>
+    <div class="account-actions" id="account-actions">
+      <button class="btn btn-quiet" data-action="show-login">Log in</button>
+      <button class="btn btn-primary" data-action="show-register">Create account</button>
+    </div>
+  </header>
+
+  <!-- MAIN APP: each view is a section; JavaScript shows one view at a time. -->
+  <main class="page-shell">
+    <section id="notice" class="notice hidden" role="status"></section>
+
+    <!-- LANDING VIEW: minimal public front page with the brand and auth actions. -->
+    <section id="view-landing" class="view landing-view">
+      <div class="landing-content">
+        <h1>KYUSISPHERE</h1>
+        <div class="landing-actions">
+          <button class="btn btn-primary" data-action="show-login">Log in</button>
+          <button class="btn btn-outline" data-action="show-register">Register</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DISCOVER VIEW: search, category filters, nearest sorting, and place cards. -->
+    <section id="view-discover" class="view">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">FIND YOUR NEXT PLACE</p>
+          <h1>Find a space<br>to <span>make things happen.</span></h1>
+          <p class="hero-description">Discover computer shops, study areas, practice spaces, and small local businesses around you.</p>
+          <div class="search-panel">
+            <label class="sr-only" for="search-input">Search places</label>
+            <span class="search-symbol">⌕</span>
+            <input id="search-input" type="search" placeholder="Search a place, category, or location">
+            <button class="btn btn-primary" id="search-button">Search</button>
+          </div>
+          <button class="text-button" id="nearest-button">◎ Find places nearest to me</button>
+          <p id="location-status" class="helper-text">Location access is optional. You can still search manually.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="hero-card card-a"><span>⌘</span><b>Computer shops</b><small>Play · Work · Connect</small></div>
+          <div class="hero-card card-b"><span>✎</span><b>Study spaces</b><small>Focus · Learn · Grow</small></div>
+          <div class="hero-card card-c"><span>♫</span><b>Practice rooms</b><small>Create · Rehearse · Repeat</small></div>
+          <div class="hero-center">K</div>
+        </div>
+      </div>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">EXPLORE YOUR OPTIONS</p><h2>Discover places</h2></div>
+          <span id="result-count" class="muted"></span>
+        </div>
+        <div class="filter-row" id="category-filters">
+          <button class="filter-chip active" data-category="All">All places</button>
+          <button class="filter-chip" data-category="Computer Shop">Computer shops</button>
+          <button class="filter-chip" data-category="Study Area">Study areas</button>
+          <button class="filter-chip" data-category="Practice Space">Practice spaces</button>
+          <button class="filter-chip" data-category="Other">Other</button>
+        </div>
+        <div id="place-list" class="place-grid"></div>
+      </section>
+    </section>
+
+    <!-- AUTH VIEW: one form switches between account registration and login. -->
+    <section id="view-auth" class="view hidden">
+      <div class="auth-wrap">
+        <div class="auth-intro"><p class="eyebrow">WELCOME TO KYUSISPHERE</p><h1 id="auth-heading">Create your account.</h1><p>Join a community that helps local places get discovered.</p></div>
+        <form id="auth-form" class="panel form-panel">
+          <div id="register-fields">
+            <label>Full name<input name="name" autocomplete="name" required placeholder="Your full name"></label>
+            <label>Email address<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+            <label>Age<input name="age" type="number" min="13" max="120" required placeholder="Your age"></label>
+            <label>Password<input name="password" type="password" minlength="6" autocomplete="new-password" required placeholder="At least 6 characters"></label>
+            <label>Account type<select name="role" required><option value="student">Student / User</option><option value="owner">Business owner</option></select></label>
+          </div>
+          <div id="login-fields" class="hidden">
+            <label>Email address<input name="loginEmail" type="email" autocomplete="username" required disabled placeholder="you@example.com"></label>
+            <label>Password<input name="loginPassword" type="password" autocomplete="current-password" required disabled placeholder="Your password"></label>
+          </div>
+          <button class="btn btn-primary btn-full" type="submit" id="auth-submit">Create account</button>
+          <p class="form-switch" id="auth-switch">Already have an account? <button type="button" class="text-button" data-action="show-login">Log in</button></p>
+          <button type="button" class="text-button back-link" data-view="landing">← Back to home</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- SUGGESTION VIEW: signed-in users can recommend places to the admin. -->
+    <section id="view-suggest" class="view hidden">
+      <div class="narrow-content">
+        <p class="eyebrow">HELP YOUR COMMUNITY</p><h1>Know a place we should add?</h1>
+        <p class="muted">Send a suggestion so the KyusiSphere team can review it.</p>
+        <form id="suggestion-form" class="panel form-panel">
+          <label>Place or business name<input name="placeName" required placeholder="e.g. ABC Computer Shop"></label>
+          <label>Location or address<input name="location" required placeholder="Street, barangay, or city"></label>
+          <label>Why should we add it?<textarea name="message" rows="4" required placeholder="Tell us what makes this place useful..."></textarea></label>
+          <button class="btn btn-primary" type="submit">Submit suggestion</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- OWNER VIEW: business owners manage listings and reservation requests. -->
+    <section id="view-owner" class="view hidden">
+      <div class="section-heading dashboard-heading"><div><p class="eyebrow">BUSINESS SPACE</p><h1>Owner dashboard</h1><p class="muted">Manage your listings and reservation requests.</p></div><button class="btn btn-primary" data-action="add-place">+ Add a place</button></div>
+      <div class="stats-grid" id="owner-stats"></div>
+      <div class="panel table-panel"><h3>Your places</h3><div id="owner-places"></div></div>
+      <div class="panel table-panel"><h3>Reservation requests</h3><div id="owner-reservations"></div></div>
+    </section>
+
+    <!-- ADMIN VIEW: administrators review listings, suggestions, and login counts. -->
+    <section id="view-admin" class="view hidden">
+      <div class="section-heading"><div><p class="eyebrow">SYSTEM MANAGEMENT</p><h1>Admin dashboard</h1><p class="muted">Review listings, community suggestions, and account activity.</p></div></div>
+      <div class="stats-grid" id="admin-stats"></div>
+      <div class="panel table-panel"><h3>All listed places</h3><div id="admin-places"></div></div>
+      <div class="panel table-panel"><h3>Community suggestions</h3><div id="admin-suggestions"></div></div>
+      <div class="panel table-panel"><h3>Login statistics</h3><div id="login-stats"></div></div>
+    </section>
+
+    <!-- ROLE SETTINGS: admins can change user roles; super admin is protected. -->
+    <section id="view-roles" class="view hidden">
+      <div class="section-heading dashboard-heading"><div><p class="eyebrow">ADMIN SETTINGS</p><h1>Manage user roles</h1><p class="muted">Only administrators can change account permissions.</p></div></div>
+      <div class="panel table-panel"><h3>Registered accounts</h3><div id="role-management"></div></div>
+    </section>
+  </main>
+
+  <footer class="footer"><span>© 2026 KyusiSphere</span><span>Discover local. Support local.</span></footer>
+
+  <!-- PLACE DIALOG: shared add/edit form for owner and admin listing management. -->
+  <dialog id="place-dialog" class="modal">
+    <form id="place-form" method="dialog" class="form-panel modal-form">
+      <div class="modal-heading"><div><p class="eyebrow">BUSINESS LISTING</p><h2 id="place-form-heading">Add a place</h2></div><button type="button" class="icon-button" data-action="close-place" aria-label="Close">×</button></div>
+      <input type="hidden" name="placeId">
+      <label>Place name<input name="name" required></label>
+      <label>Description<textarea name="description" rows="3" required></textarea></label>
+      <label>Location / address<input name="location" required></label>
+      <label>Category<select name="category"><option>Computer Shop</option><option>Study Area</option><option>Practice Space</option><option>Other</option></select></label>
+      <div class="two-fields"><label>Price / rate<input name="price" placeholder="e.g. ₱20 per hour"></label><label>Contact details<input name="contact" placeholder="Phone, email, or social link"></label></div>
+      <div class="two-fields"><label>Latitude (optional)<input name="latitude" type="number" step="any"></label><label>Longitude (optional)<input name="longitude" type="number" step="any"></label></div>
+      <div class="check-row"><label><input name="reservationAvailable" type="checkbox"> Accepts reservations</label><label><input name="walkInAvailable" type="checkbox" checked> Accepts walk-ins</label></div>
+      <button class="btn btn-primary btn-full" type="submit">Save place</button>
+    </form>
+  </dialog>
+
+  <!-- RESERVATION DIALOG: collects a user's preferred date, time, and note. -->
+  <dialog id="reservation-dialog" class="modal">
+    <form id="reservation-form" method="dialog" class="form-panel modal-form">
+      <div class="modal-heading"><div><p class="eyebrow">RESERVATION REQUEST</p><h2>Request a reservation</h2></div><button type="button" class="icon-button" data-action="close-reservation">×</button></div>
+      <input type="hidden" name="placeId">
+      <p id="reservation-place-name" class="muted"></p>
+      <label>Preferred date<input name="date" type="date" required></label>
+      <label>Preferred time<input name="time" type="time" required></label>
+      <label>Note (optional)<textarea name="note" rows="3" placeholder="Any additional details..."></textarea></label>
+      <button class="btn btn-primary btn-full" type="submit">Send request</button>
+    </form>
+  </dialog>
+
+  <!-- Load the application as an ES module; relative paths also work on GitHub Pages. -->
+  <script type="module">
+    // Import the main controller and show a helpful message if a module cannot load.
+    import("./js/Main.js").catch((error) => {
+      console.error("KyusiSphere JavaScript failed to load:", error);
+      const notice = document.getElementById("notice");
+      notice.textContent = "The app could not load its JavaScript. Open this folder with VS Code Live Server or deploy it to GitHub Pages; do not open index.html directly.";
+      notice.classList.remove("hidden");
+      notice.classList.add("error");
+    });
+  </script>
+</body>
+</html>
